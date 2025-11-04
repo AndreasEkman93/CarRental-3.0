@@ -1,36 +1,41 @@
-﻿using CarRental.Data;
+﻿using System.Threading.Tasks;
+using CarRental.Data;
 using CarRental.Models;
+using CarRentalClient.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewEngines;
 
 namespace CarRental.Controllers
 {
     public class CarController : Controller
     {
-        private readonly ICar carRepository;
+        private readonly ICarService carService;
 
-        public CarController(ICar carRepository)
+        public CarController(ICarService carService)
         {
-            this.carRepository = carRepository;
+            this.carService = carService;
         }
 
         // GET: CarController
         [AllowAnonymous]
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View(carRepository.GetAll());
+            var cars = await carService.GetAllCarsAsync();
+            return View(cars);
         }
 
         // GET: CarController/Details/5
-        [Authorize(Roles = "Admin,Customer")]
-        public ActionResult Details(int id)
+        //[Authorize(Roles = "Admin,Customer")]
+        public async Task<ActionResult> Details(int id)
         {
-            return View(carRepository.GetById(id));
+            var car = await carService.GetCarByIdAsync(id);
+            return View(car);
         }
 
         // GET: CarController/Create
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public ActionResult Create()
         {
             return View();
@@ -40,72 +45,94 @@ namespace CarRental.Controllers
         // POST: CarController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public ActionResult Create(Car car)
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create(Car car)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(car);
+            }
+
             try
             {
-                if (ModelState.IsValid)
-                {
-                    carRepository.Add(car);
-                }
+                await carService.CreateCarAsync(car);
                 return RedirectToAction("Index", "Admin");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Här kan du logga felet (t.ex. till konsol, fil, etc.)
+                Console.WriteLine($"Error posting to API: {ex.Message}");
+                ModelState.AddModelError("", "Ett oväntat fel uppstod vid kommunikation med API:t.");
             }
+
+            return View(car);
         }
 
         // GET: CarController/Edit/5
-        [Authorize(Roles = "Admin")]
-        public ActionResult Edit(int id)
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int id)
         {
-            return View(carRepository.GetById(id));
+            var car = await carService.GetCarByIdAsync(id);
+            return View(car);
         }
 
         // POST: CarController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public ActionResult Edit(Car car)
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult> Edit(Car car)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(car);
+            }
+
             try
             {
-                if (ModelState.IsValid)
-                {
-                    carRepository.Update(car);
-                }
+                await carService.UpdateCarAsync(car.Id, car);
                 return RedirectToAction("Index", "Admin");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Här kan du logga felet (t.ex. till konsol, fil, etc.)
+                Console.WriteLine($"Error posting to API: {ex.Message}");
+                ModelState.AddModelError("", "Ett oväntat fel uppstod vid kommunikation med API:t.");
             }
+
+            return View(car);
         }
 
         // GET: CarController/Delete/5
-        [Authorize(Roles = "Admin")]
-        public ActionResult Delete(int id)
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
         {
-            return View(carRepository.GetById(id));
+            var car = await carService.GetCarByIdAsync(id);
+            return View(car);
         }
 
         // POST: CarController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public ActionResult Delete(Car car)
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(Car car)
         {
+            if(car == null)
+            {
+                return BadRequest();
+            }
+
             try
             {
-                carRepository.Delete(car);
+                await carService.DeleteCarAsync(car.Id);
                 return RedirectToAction("Index", "Admin");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // Här kan du logga felet (t.ex. till konsol, fil, etc.)
+                Console.WriteLine($"Error deleting from API: {ex.Message}");
+                ModelState.AddModelError("", "Ett oväntat fel uppstod vid kommunikation med API:t.");
             }
+            return View(car);
         }
     }
 }
