@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using CarRental.Data;
 using CarRental.Models;
+using CarRentalClient.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +26,8 @@ namespace CarRental
 
             builder.Services.AddTransient<IOrder, OrderRepository>();
             builder.Services.AddTransient<ICar, CarRepository>();
+            builder.Services.AddHttpClient();
+            builder.Services.AddScoped<ICarService, CarService>();
 
             builder.Services.AddAuthentication();
             builder.Services.AddAuthorization();
