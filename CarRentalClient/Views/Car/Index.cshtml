@@ -1,0 +1,55 @@
+﻿@model IEnumerable<CarRental.Models.Car>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Model)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RegNr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PricePerDay)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ImageUrls)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Model)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RegNr)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PricePerDay)
+                </td>
+                <td>
+                    @foreach(var image in item.ImageUrls)
+                    {
+                        <img src="@image" />
+                    }
+                </td>
+                <td>
+                    @if (!User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Order" asp-action="Create" asp-route-id="@item.Id">Book</a>
+                    }
+                
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

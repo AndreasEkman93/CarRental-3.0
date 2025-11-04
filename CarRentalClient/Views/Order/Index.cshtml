@@ -1,0 +1,65 @@
+﻿@model IEnumerable<CarRental.Models.Order>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Car.Model)
+            </th>
+            @if (User.IsInRole("Admin"))
+            {
+                <th>
+                    @Html.DisplayNameFor(model => model.Customer)
+                </th>
+            }
+            <th>
+                @Html.DisplayNameFor(model => model.StartDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EndDate)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            var isExpired = item.EndDate < DateOnly.FromDateTime(DateTime.Today);
+            var rowClass = isExpired ? "table-secondary" : "";
+            <tr class="@rowClass">
+                <td>
+                    @Html.DisplayFor(modelItem => item.Car.Model)
+                </td>
+                @if (User.IsInRole("Admin"))
+                {
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Customer.Id)
+                    </td>
+                }
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EndDate)
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    @if(item.EndDate >= DateOnly.FromDateTime(DateTime.Today))
+                    {
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    }
+                    else
+                    {
+                        <a>Finished</a>
+                    }
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

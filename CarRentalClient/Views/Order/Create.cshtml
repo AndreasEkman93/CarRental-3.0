@@ -1,0 +1,60 @@
+﻿@model CarRental.Models.OrderCreateViewModel
+
+@{
+    ViewData["Title"] = "Create";
+    var bookedDates = ViewBag.BookedDates as List<string> ?? new List<string>();
+    var today = DateTime.Today;
+    var daysInMonth = DateTime.DaysInMonth(today.Year, today.Month);
+}
+
+<h4>Status for @today.ToString("MMMM yyyy")</h4>
+<ul>
+    @for (int day = today.Day; day <= daysInMonth; day++) /* Lists the remaining days of the month and shows if each day is booked or available */
+    {
+        var date = new DateTime(today.Year, today.Month, day);
+        string formatted = date.ToString("yyyy-MM-dd");
+        bool isBooked = bookedDates.Contains(formatted);
+
+        <li style="color:@(isBooked ? "red" : "green")">
+            @day @if (isBooked)
+            {
+                <text>❌ Booked</text>
+            }
+            else
+            {
+                <text>✅ Available</text>
+            }
+        </li>
+    }
+</ul>
+
+<h1>Create</h1>
+
+<h4>Booking for car: @ViewBag.CarModel</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="CarId" />
+            <div class="form-group">
+                <label asp-for="StartDate" class="control-label" ></label>
+                <input asp-for="StartDate" class="form-control" type ="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EndDate" class="control-label" ></label>
+                <input asp-for="EndDate" class="form-control" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                <span asp-validation-for="EndDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

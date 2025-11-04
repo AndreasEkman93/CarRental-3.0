@@ -1,0 +1,74 @@
+﻿@model CarRental.Models.AdminViewModel
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Admin Panel</h1>
+
+<h3>Orders</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Car</th>
+            <th>Customer</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model.Orders) @* If the EndDate of the order is before today it will make it grey and remove the Delete action.*@
+        {
+            var isExpired = order.EndDate < DateOnly.FromDateTime(DateTime.Today);
+            var rowClass = isExpired ? "table-secondary" : "";
+            <tr class="@rowClass">
+                <td>@order.Car.Model</td>
+                <td>@order.Customer.UserName</td>
+                <td>@order.StartDate</td>
+                <td>@order.EndDate</td>
+                <td>
+                    <a asp-action="Details" asp-controller="Order" asp-route-id="@order.Id">Details</a>
+                    @if (order.EndDate >= DateOnly.FromDateTime(DateTime.Today))
+                    {
+                        <a asp-action="Delete" asp-controller="Order" asp-route-id="@order.Id">Delete</a>
+                    }
+                    else
+                    {
+                        <a>Finished</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Cars</h3>
+<p>
+    <a asp-controller="Car" asp-action="Create">Create New</a>
+</p>
+<ul>
+    @foreach (var car in Model.Cars)
+    {
+        <li>
+            @car.Model
+            --
+            @car.RegNr
+            <a asp-action="Edit" asp-controller="Car" asp-route-id="@car.Id">Edit</a> |
+            <a asp-action="Details" asp-controller="Car" asp-route-id="@car.Id">Details</a> |
+            <a asp-action="Delete" asp-controller="Car" asp-route-id="@car.Id">Delete</a>
+        </li>
+    }
+</ul>
+<h3>Customers</h3>
+<p>
+    <a asp-action="CustomerCreate">Create New</a>
+</p>
+<ul>
+    @foreach (var customer in Model.Customers)
+    {
+        <li>
+            @customer.UserName
+            <a asp-action="CustomerEdit" asp-route-id="@customer.Id">Edit</a> |
+            <a asp-action="CustomerDelete" asp-route-id="@customer.Id">Delete</a>
+        </li>
+    }
+</ul>
