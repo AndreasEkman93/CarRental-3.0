@@ -1,8 +1,13 @@
-﻿using CarRental.Models;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using CarRental.Models;
+using CarRentalApi.Constants;
 using CarRentalApi.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CarRentalApi.Controllers
 {
@@ -11,10 +16,12 @@ namespace CarRentalApi.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly IConfiguration configuration;
 
-        public AuthController(UserManager<ApplicationUser> userManager)
+        public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration)
         {
             this.userManager = userManager;
+            this.configuration = configuration;
         }
         [HttpPost]
         [Route("register")]
@@ -52,7 +59,7 @@ namespace CarRentalApi.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login(LoginUserDto userDto)
+        public async Task<ActionResult<AuthResponse>> Login(LoginUserDto userDto)
         {
             try
             {
@@ -61,17 +68,54 @@ namespace CarRentalApi.Controllers
                
                 if (user == null || passwordValid == false)
                 {
-                    return NotFound();
+                    return Unauthorized(userDto);
                 }
 
-                //Add whatever is needed to create a JWT
+                string tokenString = await GenerateToken(user);
+                
+                var response = new AuthResponse
+                {
+                    Token = tokenString,
+                    UserId = user.Id,
+                    Email = userDto.Email
+                };
 
-                return Accepted();
+                return Accepted(response);
             }
             catch (Exception ex)
             {
                 return Problem($"Something Went Wrong in the{ex}", statusCode: 500);
             }
+        }
+
+        private async Task<string> GenerateToken(ApplicationUser user)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var roles = await userManager.GetRolesAsync(user);
+            var roleClaims = roles.Select( r => new Claim(ClaimTypes.Role, r)).ToList();
+
+            var userClaims = await userManager.GetClaimsAsync(user);
+
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(CustomClaimTypes.Uid, user.Id)
+                }.Union(roleClaims)
+                .Union(userClaims);
+
+            var token = new JwtSecurityToken(
+                issuer: configuration["JwtSettings:Issuer"],
+                audience: configuration["JwtSettings:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(Convert.ToInt32(configuration["JwtSettings:DurationInMinutes"])),
+                signingCredentials: credentials
+                );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }
