@@ -48,16 +48,6 @@ namespace CarRental
             app.UseAuthentication();
             app.UseAuthorization();
 
-            //// The code below creates an ApplicationUser with the Admin role.
-            //// Uncomment it, update the username and password in IdentityConfig as needed,
-            //// then run the program once to create the admin user.
-
-            //var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
-            //using (var scope = scopeFactory.CreateScope())
-            //{
-            //    await IdentityConfig.CreateAdminUserAsync(scope.ServiceProvider);
-            //}
-
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
