@@ -1,5 +1,6 @@
 ﻿using CarRental.Data;
 using CarRental.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -26,6 +27,7 @@ namespace CarRentalApi.Controllers
 
         // GET api/<CarController>/5
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,Customer")]
         public ActionResult<Car> GetCar(int id)
         {
             var car = carRepository.GetById(id);
@@ -38,6 +40,7 @@ namespace CarRentalApi.Controllers
 
         // POST api/<CarController>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public ActionResult<Car> PostCar(Car car)
         {
             if(car == null)
@@ -51,6 +54,7 @@ namespace CarRentalApi.Controllers
 
         // PUT api/<CarController>/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public ActionResult<Car> PutCar(int id, Car car)
         {
             if(car == null || car.Id != id)
@@ -71,6 +75,7 @@ namespace CarRentalApi.Controllers
 
         // DELETE api/<CarController>/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public ActionResult DeleteCar(int id)
         {
             var car = carRepository.GetById(id);
