@@ -33,14 +33,11 @@
                         </li>
 
                         @{
-                            var token = HttpContextAccessor.HttpContext?.Session.GetString("AccessToken");
-                            if (!string.IsNullOrEmpty(token))
+                            var rolesJson = Context.Session.GetString("UserRoles");
+                            if (!string.IsNullOrEmpty(rolesJson))
                             {
-                                var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
-                                var jwtToken = handler.ReadJwtToken(token);
-                                var roles = jwtToken.Claims.Where(c => c.Type == "role").Select(c => c.Value).ToList();
-
-                                if (roles.Contains("Admin"))
+                                var roles = System.Text.Json.JsonSerializer.Deserialize<List<string>>(rolesJson);
+                                if (roles != null && roles.Contains("Admin"))
                                 {
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Admin</a>
@@ -55,7 +52,7 @@
                     @* <partial name="_LoginPartial" /> *@
                     <ul class="navbar-nav ms-auto">
                         @{
-                            token = HttpContextAccessor.HttpContext?.Session.GetString("AccessToken");
+                            var token = HttpContextAccessor.HttpContext?.Session.GetString("AccessToken");
                             if (string.IsNullOrEmpty(token))
                             {
                                 // Inte inloggad

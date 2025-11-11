@@ -84,5 +84,11 @@ namespace CarRentalClient.Controllers
             await authenticationService.Logout();
             return RedirectToAction("Login", "Auth");
         }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
     }
 }

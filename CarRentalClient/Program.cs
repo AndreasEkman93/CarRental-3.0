@@ -28,16 +28,20 @@ namespace CarRental
 
             builder.Services.AddTransient<IOrder, OrderRepository>();
             builder.Services.AddTransient<ICar, CarRepository>();
-            builder.Services.AddHttpClient();
+
+            //builder.Services.AddHttpClient();
             builder.Services.AddSession();
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddScoped<ICarService, CarService>();
-            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddHttpClient<IClient, Client>(client =>
             {
                 client.BaseAddress = new Uri("https://localhost:7054");
             });
+            builder.Services.AddHttpClient<ICarService, CarService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7054");
+            });
 
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddAuthentication();
             builder.Services.AddAuthorization();
 
@@ -52,11 +56,12 @@ namespace CarRental
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+            app.UseSession();
             app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseSession();
+            
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
