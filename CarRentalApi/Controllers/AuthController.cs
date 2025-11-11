@@ -49,7 +49,7 @@ namespace CarRentalApi.Controllers
                     }
                 }
                 await userManager.AddToRoleAsync(user, "Customer");
-                return Accepted();
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -80,7 +80,7 @@ namespace CarRentalApi.Controllers
                     Email = userDto.Email
                 };
 
-                return Accepted(response);
+                return Ok(response);
             }
             catch (Exception ex)
             {

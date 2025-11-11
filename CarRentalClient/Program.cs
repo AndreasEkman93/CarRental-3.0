@@ -2,6 +2,8 @@ using System.Threading.Tasks;
 using CarRental.Data;
 using CarRental.Models;
 using CarRentalClient.Services;
+using CarRentalClient.Services.Authentication;
+using CarRentalClient.Services.Base;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,7 +29,14 @@ namespace CarRental
             builder.Services.AddTransient<IOrder, OrderRepository>();
             builder.Services.AddTransient<ICar, CarRepository>();
             builder.Services.AddHttpClient();
+            builder.Services.AddSession();
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<ICarService, CarService>();
+            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddHttpClient<IClient, Client>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7054");
+            });
 
             builder.Services.AddAuthentication();
             builder.Services.AddAuthorization();
@@ -47,7 +56,7 @@ namespace CarRental
 
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseSession();
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
