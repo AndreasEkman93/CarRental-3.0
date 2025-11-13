@@ -12,7 +12,6 @@ namespace CarRentalApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class OrderController : ControllerBase
     {
         private readonly IOrder orderRepository;

@@ -1,5 +1,5 @@
 ﻿using CarRental.Data;
-using CarRental.Models;
+using CarRentalClient.Services.Base;
 using CarRentalClient.Filters;
 using CarRentalClient.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -22,10 +22,19 @@ namespace CarRental.Controllers
             this.carService = carService;
         }
 
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
-            var orders = await _orderService.GetOrdersAsync();
-            return View(orders);
+            var response = await _orderService.GetOrdersAsync();
+
+            if (!response.Success)
+            {
+                // Här kan du logga felet eller visa ett meddelande i ViewBag
+                ViewBag.ErrorMessage = response.Message ?? "Kunde inte hämta ordrar.";
+                return View(new List<Order>()); // Returnerar tom lista till vyn
+            }
+
+            // Returnera själva listan (Data) till vyn
+            return View(response.Data);
         }
 
         public async Task<ActionResult> Create(int id)
@@ -33,8 +42,8 @@ namespace CarRental.Controllers
             var model = new OrderCreateViewModel
             {
                 CarId = id,
-                StartDate = DateOnly.FromDateTime(DateTime.Today),
-                EndDate = DateOnly.FromDateTime(DateTime.Today)
+                StartDate = DateTime.Today,
+                EndDate = DateTime.Today
             };
             var car = await carService.GetCarByIdAsync(id);
             ViewBag.CarModel = car.Model;
@@ -60,6 +69,7 @@ namespace CarRental.Controllers
                 }
                 var orders = await _orderService.GetOrdersAsync();
                 var existingOrders = orders
+                    .Data
                     .Where(o => o.CarId == model.CarId)
                     .ToList();
 
@@ -75,13 +85,7 @@ namespace CarRental.Controllers
                     }
                 }
 
-                var result = await _orderService.CreateOrderAsync(model);
-                if (!result.Success)
-                {
-                    ModelState.AddModelError("", result.ErrorMessage);
-                    return View(model);
-                }
-
+                await _orderService.CreateOrderAsync(model);
                 return RedirectToAction("OrderConfirmation");
             }
             catch

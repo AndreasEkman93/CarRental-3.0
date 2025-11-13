@@ -26,13 +26,13 @@ namespace CarRental.Data
 
         public IEnumerable<Order> GetAll()
         {
-            return context.Orders.Include(o => o.Car).OrderBy(o => o.CustomerId).ThenByDescending(o=> o.EndDate).ToList();
+            return context.Orders.Include(c => c.Customer).Include(o => o.Car).OrderBy(o => o.CustomerId).ThenByDescending(o=> o.EndDate).ToList();
         }
 
         public IEnumerable<Order> GetAllSpecificCustomer(string id)
         {
 
-            return context.Orders.Include(o => o.Car).Where(o => o.CustomerId == id).OrderByDescending(o => o.StartDate).ToList();
+            return context.Orders.Include(c => c.Customer).Include(o => o.Car).Where(o => o.CustomerId == id).OrderByDescending(o => o.StartDate).ToList();
         }
 
         public Order GetById(int id)
