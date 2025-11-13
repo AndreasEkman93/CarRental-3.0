@@ -1,5 +1,6 @@
 ﻿using CarRental.Data;
 using CarRental.Models;
+using CarRentalClient.Filters;
 using CarRentalClient.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace CarRental.Controllers
 {
+    [JwtAuthorize]
     public class OrderController : Controller
     {
         private readonly IOrderService _orderService;

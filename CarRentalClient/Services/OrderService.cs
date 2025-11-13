@@ -21,10 +21,7 @@ namespace CarRentalClient.Services
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var response = await _httpClient.GetAsync("api/order");
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                return new List<Order>();
-            }
+
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception("Failed to retrieve orders.");
