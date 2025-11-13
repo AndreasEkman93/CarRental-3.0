@@ -1,4 +1,5 @@
-﻿@model CarRental.Models.Order
+﻿@using CarRentalClient.Services.Base
+@model OrderDto
 
 @{
     ViewData["Title"] = "Delete";
@@ -12,10 +13,10 @@
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Car)
+            @Html.DisplayNameFor(model => model.CarModel)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Car.Model)
+            @Html.DisplayFor(model => model.CarModel)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.StartDate)

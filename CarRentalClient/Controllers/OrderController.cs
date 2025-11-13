@@ -1,5 +1,6 @@
 ﻿using CarRental.Data;
-using CarRental.Models;
+using CarRentalClient.Services.Base;
+using CarRentalClient.Filters;
 using CarRentalClient.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace CarRental.Controllers
 {
+    [JwtAuthorize]
     public class OrderController : Controller
     {
         private readonly IOrderService _orderService;
@@ -20,10 +22,19 @@ namespace CarRental.Controllers
             this.carService = carService;
         }
 
-        public async Task<ActionResult> Index()
+        public async Task<IActionResult> Index()
         {
-            var orders = await _orderService.GetOrdersAsync();
-            return View(orders);
+            var response = await _orderService.GetOrdersAsync();
+
+            if (!response.Success)
+            {
+                // Här kan du logga felet eller visa ett meddelande i ViewBag
+                ViewBag.ErrorMessage = response.Message ?? "Kunde inte hämta ordrar.";
+                return View(new List<OrderDto>()); // Returnerar tom lista till vyn
+            }
+
+            // Returnera själva listan (Data) till vyn
+            return View(response.Data);
         }
 
         public async Task<ActionResult> Create(int id)
@@ -31,11 +42,11 @@ namespace CarRental.Controllers
             var model = new OrderCreateViewModel
             {
                 CarId = id,
-                StartDate = DateOnly.FromDateTime(DateTime.Today),
-                EndDate = DateOnly.FromDateTime(DateTime.Today)
+                StartDate = DateTime.Today,
+                EndDate = DateTime.Today
             };
             var car = await carService.GetCarByIdAsync(id);
-            ViewBag.CarModel = car.Model;
+            ViewBag.CarModel = car.Data.Model;
 
             // Get all booked dates for this car to help the customer not to pick reserved dates
             var bookedDates = await _orderService.GetBookedDatesForCarAsync(id);
@@ -53,11 +64,12 @@ namespace CarRental.Controllers
                 if (model.EndDate < model.StartDate)
                 {
                     ModelState.AddModelError("EndDate", "End date must be after or equal to Start Date.");
-                    ViewBag.CarModel = carService.GetCarByIdAsync(model.CarId).Result.Model;
+                    ViewBag.CarModel = carService.GetCarByIdAsync(model.CarId).Result.Data.Model;
                     return View();
                 }
                 var orders = await _orderService.GetOrdersAsync();
                 var existingOrders = orders
+                    .Data
                     .Where(o => o.CarId == model.CarId)
                     .ToList();
 
@@ -66,20 +78,14 @@ namespace CarRental.Controllers
                     if (model.StartDate <= existingOrder.EndDate && model.EndDate >= existingOrder.StartDate)
                     {
                         ModelState.AddModelError("", "Selected dates overlap with an existing booking.");
-                        ViewBag.CarModel = carService.GetCarByIdAsync(model.CarId).Result.Model;
+                        ViewBag.CarModel = carService.GetCarByIdAsync(model.CarId).Result.Data.Model;
                         var bookedDates = await _orderService.GetBookedDatesForCarAsync(model.CarId);
                         ViewBag.BookedDates = bookedDates.Select(d => d.ToString("yyyy-MM-dd")).ToList();
                         return View(model);
                     }
                 }
 
-                var result = await _orderService.CreateOrderAsync(model);
-                if (!result.Success)
-                {
-                    ModelState.AddModelError("", result.ErrorMessage);
-                    return View(model);
-                }
-
+                await _orderService.CreateOrderAsync(model);
                 return RedirectToAction("OrderConfirmation");
             }
             catch
@@ -98,21 +104,21 @@ namespace CarRental.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var order = await _orderService.GetOrderByIdAsync(id);
-            return View(order);
+            return View(order.Data);
         }
 
         // POST: OrderController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(Order order)
+        public async Task<IActionResult> Delete(OrderDto orderDto)
         {
-            if (order == null)
+            if (orderDto == null)
             {
                 return BadRequest();
             }
             try
             {
-                await _orderService.DeleteOrderAsync(order.Id);
+                await _orderService.DeleteOrderAsync(orderDto.Id);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -121,17 +127,17 @@ namespace CarRental.Controllers
                 Console.WriteLine($"Error deleting from API: {ex.Message}");
                 ModelState.AddModelError("", "Ett oväntat fel uppstod vid kommunikation med API:t.");
             }
-            return View(order);
+            return View(orderDto);
         }
 
         public async Task<IActionResult> Details(int id)
         {
             var order = await _orderService.GetOrderByIdAsync(id);
-            var car = await carService.GetCarByIdAsync(order.CarId);
+            var car = await carService.GetCarByIdAsync(order.Data.CarId);
 
-            ViewBag.CarModel = car.Model;
-            ViewBag.CarRegNr = car.RegNr;
-            return View(order);
+            ViewBag.CarModel = car.Data.Model;
+            ViewBag.CarRegNr = car.Data.RegNr;
+            return View(order.Data);
         }
     }
 }

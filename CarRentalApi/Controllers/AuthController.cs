@@ -88,38 +88,6 @@ namespace CarRentalApi.Controllers
             }
         }
 
-        //private async Task<string> GenerateToken(ApplicationUser user)
-        //{
-        //    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]));
-        //    var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        //    var roles = await userManager.GetRolesAsync(user);
-        //    var roleClaims = roles.Select( r => new Claim("role", r)).ToList();
-
-        //    var userClaims = (await userManager.GetClaimsAsync(user))
-        //            .Where(c => c.Type != ClaimTypes.Role);
-
-
-
-        //    var claims = new List<Claim>
-        //    {
-        //        new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-        //        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        //        new Claim(JwtRegisteredClaimNames.Email, user.Email),
-        //        new Claim(CustomClaimTypes.Uid, user.Id)
-        //        }.Union(roleClaims)
-        //        .Union(userClaims);
-
-        //    var token = new JwtSecurityToken(
-        //        issuer: configuration["JwtSettings:Issuer"],
-        //        audience: configuration["JwtSettings:Audience"],
-        //        claims: claims,
-        //        expires: DateTime.Now.AddMinutes(Convert.ToInt32(configuration["JwtSettings:DurationInMinutes"])),
-        //        signingCredentials: credentials
-        //        );
-
-        //    return new JwtSecurityTokenHandler().WriteToken(token);
-        //}
         private async Task<string> GenerateToken(ApplicationUser user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]));

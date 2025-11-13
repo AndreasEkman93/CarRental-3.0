@@ -1,4 +1,5 @@
 ﻿using CarRental.Models;
+using CarRentalApi.Dto;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,30 +25,80 @@ namespace CarRental.Data
             context.SaveChanges();
         }
 
-        public IEnumerable<Order> GetAll()
+        public IEnumerable<OrderDto> GetAll()
         {
-            return context.Orders.Include(o => o.Car).OrderBy(o => o.CustomerId).ThenByDescending(o=> o.EndDate).ToList();
+            //return context.Orders.Include(c => c.Customer).Include(o => o.Car).OrderBy(o => o.CustomerId).ThenByDescending(o=> o.EndDate).ToList();
+            return context.Orders.Include(c => c.Customer).Include(o => o.Car).OrderBy(o => o.CustomerId).ThenByDescending(o => o.EndDate)
+                .Select(o => new OrderDto
+                {
+                    Id = o.Id,
+                    CarId = o.CarId,
+                    CarModel = o.Car.Model,
+                    CustomerId = o.CustomerId,
+                    StartDate = o.StartDate,
+                    EndDate = o.EndDate
+                }).ToList();
         }
 
-        public IEnumerable<Order> GetAllSpecificCustomer(string id)
+        public IEnumerable<OrderDto> GetAllSpecificCustomer(string id)
         {
 
-            return context.Orders.Include(o => o.Car).Where(o => o.CustomerId == id).OrderByDescending(o => o.StartDate).ToList();
+            //return context.Orders.Include(c => c.Customer).Include(o => o.Car).Where(o => o.CustomerId == id).OrderByDescending(o => o.StartDate).ToList();
+            return context.Orders
+                .Include(o => o.Car)
+                .Include(o => o.Customer)
+                .Where(o => o.CustomerId == id)
+                .OrderByDescending(o => o.StartDate)
+                .Select(o => new OrderDto
+                {
+                    Id = o.Id,
+                    CarId = o.CarId,
+                    CarModel = o.Car.Model,
+                    CustomerId = o.CustomerId,
+                    StartDate = o.StartDate,
+                    EndDate = o.EndDate
+                })
+                .ToList();
         }
-
         public Order GetById(int id)
         {
-            var order = context.Orders.Include(a => a.Customer).Include(b => b.Car).FirstOrDefault(s => s.Id==id);
+            var order = context.Orders.Include(a => a.Customer).Include(b => b.Car).FirstOrDefault(s => s.Id == id);
             if (order != null)
             {
                 return order;
             }
             return null;
         }
+        public OrderDto GetDtoById(int id)
+        {
+            //var order = context.Orders.Include(a => a.Customer).Include(b => b.Car).FirstOrDefault(s => s.Id==id);
+            //if (order != null)
+            //{
+            //    return order;
+            //}
+            //return null;
+            var order = context.Orders
+                .Include(a => a.Customer)
+                .Include(b => b.Car)
+                .FirstOrDefault(s => s.Id == id);
+            if (order != null)
+            {
+                return new OrderDto
+                {
+                    Id = order.Id,
+                    CarId = order.CarId,
+                    CarModel = order.Car.Model,
+                    CustomerId = order.CustomerId,
+                    StartDate = order.StartDate,
+                    EndDate = order.EndDate
+                };
+            }
+            return null;
+        }
 
         public List<DateOnly> GetBookedDatesForCar(int carId)
         {
-            var orders = context.Orders.Where(o => o.CarId==carId).ToList();
+            var orders = context.Orders.Where(o => o.CarId == carId).ToList();
 
             var bookedDates = new List<DateOnly>();
 

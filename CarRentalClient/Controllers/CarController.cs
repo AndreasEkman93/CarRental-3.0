@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using CarRental.Data;
-using CarRental.Models;
 using CarRentalClient.Services;
+using CarRentalClient.Services.Base;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +23,7 @@ namespace CarRental.Controllers
         public async Task<ActionResult> Index()
         {
             var cars = await carService.GetAllCarsAsync();
-            return View(cars);
+            return View(cars.Data);
         }
 
         // GET: CarController/Details/5
@@ -31,7 +31,7 @@ namespace CarRental.Controllers
         public async Task<ActionResult> Details(int id)
         {
             var car = await carService.GetCarByIdAsync(id);
-            return View(car);
+            return View(car.Data);
         }
 
         // GET: CarController/Create

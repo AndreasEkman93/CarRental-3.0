@@ -3,10 +3,12 @@ using System.Security.Claims;
 using System.Text;
 using CarRental.Data;
 using CarRental.Models;
+using CarRentalApi.Constants;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text.Json.Serialization;
 
 namespace CarRentalApi
 {
@@ -25,9 +27,17 @@ namespace CarRentalApi
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
-            builder.Services.AddIdentityCore<ApplicationUser>()
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            //builder.Services.AddIdentityCore<ApplicationUser>()
+            //    .AddRoles<IdentityRole>()
+            //    .AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 6;
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
             builder.Services.AddSwaggerGen();
 
@@ -42,11 +52,11 @@ namespace CarRentalApi
                     });
             });
 
-            builder.Services.AddAuthentication( options =>
+            builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer( options =>
+            }).AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -57,52 +67,18 @@ namespace CarRentalApi
                     ClockSkew = TimeSpan.Zero,
                     ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
                     ValidAudience = builder.Configuration["JwtSettings:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"])),
-                    RoleClaimType = "role"
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
                 };
-
-                options.Events = new JwtBearerEvents
-                {
-                    OnTokenValidated = context =>
-                    {
-                        var identity = context.Principal.Identity as ClaimsIdentity;
-
-                        // Map any long URI role claims to "role"
-                        var longUriRoleClaim = identity.FindFirst(ClaimTypes.Role);
-                        if (longUriRoleClaim != null)
-                        {
-                            identity.AddClaim(new Claim("role", longUriRoleClaim.Value));
-                        }
-
-                        return Task.CompletedTask;
-                    }
-                };
-                //options.Events = new JwtBearerEvents
-                //{
-                //    OnTokenValidated = context =>
-                //    {
-                //        Console.WriteLine("Token validated. Claims:");
-                //        foreach (var c in context.Principal.Claims)
-                //        {
-                //            Console.WriteLine($"{c.Type} = {c.Value}");
-                //        }
-                //        return Task.CompletedTask;
-                //    },
-                //    OnAuthenticationFailed = context =>
-                //    {
-                //        Console.WriteLine("Auth failed: " + context.Exception.Message);
-                //        return Task.CompletedTask;
-                //    },
-                //    OnChallenge = context =>
-                //    {
-                //        Console.WriteLine("Unauthorized request: " + context.Error);
-                //        return Task.CompletedTask;
-                //    }
-                //};
             });
+
+            //builder.Services.AddAuthorizationBuilder()
+            //    .AddPolicy("Admin", policy => policy.RequireRole("Admin", "Admin"))
+            //    .AddPolicy("Customer", policy => policy.RequireClaim("Customer", "Customer"));
+
             // Add services to the container.
 
             builder.Services.AddControllers();
+
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
@@ -125,7 +101,7 @@ namespace CarRentalApi
             app.UseCors("AllowAll");
             app.UseAuthentication();
             app.UseAuthorization();
-            
+
 
             app.MapControllers();
 

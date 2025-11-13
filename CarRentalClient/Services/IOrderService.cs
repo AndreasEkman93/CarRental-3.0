@@ -1,15 +1,13 @@
-﻿using CarRental.Models;
-
-using CarRentalClient.Models;
+﻿using CarRentalClient.Services.Base;
 
 namespace CarRentalClient.Services
 {
     public interface IOrderService
     {
-        Task<IEnumerable<Order>> GetOrdersAsync();
-        Task<ApiResponse> CreateOrderAsync(OrderCreateViewModel model);
+        Task<Response<List<OrderDto>>> GetOrdersAsync();
+        Task CreateOrderAsync(OrderCreateViewModel model);
         Task DeleteOrderAsync(int id);
         Task<IEnumerable<DateOnly>> GetBookedDatesForCarAsync(int carId);
-        Task<Order> GetOrderByIdAsync(int id);
+        Task<Response<OrderDto>> GetOrderByIdAsync(int id);
     }
 }
