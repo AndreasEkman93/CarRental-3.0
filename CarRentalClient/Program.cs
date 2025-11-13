@@ -15,23 +15,10 @@ namespace CarRental
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
-            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddRoles<IdentityRole>() //Added roles to Identity.
-                .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
-
-            builder.Services.AddTransient<IOrder, OrderRepository>();
-            builder.Services.AddTransient<ICar, CarRepository>();
-
-            //builder.Services.AddHttpClient();
             builder.Services.AddSession();
-            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddHttpContextAccessor();         
+            
             builder.Services.AddHttpClient<IClient, Client>(client =>
             {
                 client.BaseAddress = new Uri("https://localhost:7054");
@@ -40,10 +27,15 @@ namespace CarRental
             {
                 client.BaseAddress = new Uri("https://localhost:7054");
             });
+            builder.Services.AddHttpClient<IOrderService, OrderService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7054");
+            });
 
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddAuthentication();
             builder.Services.AddAuthorization();
+
 
             var app = builder.Build();
 
@@ -58,7 +50,6 @@ namespace CarRental
             }
             app.UseSession();
             app.UseRouting();
-
             app.UseAuthentication();
             app.UseAuthorization();
             
@@ -66,9 +57,7 @@ namespace CarRental
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
-                .WithStaticAssets();
-            app.MapRazorPages()
-               .WithStaticAssets();
+                .WithStaticAssets();;
 
             app.Run();
         }

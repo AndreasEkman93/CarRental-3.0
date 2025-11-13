@@ -45,6 +45,13 @@
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-controller="Order" asp-action="Index">Orders</a>
                                     </li>
+                                    
+                                }
+                                if(roles != null && roles.Contains("Customer"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-controller="Order" asp-action="Index">Orders</a>
+                                    </li>
                                 }
                             }
                         }
