@@ -108,7 +108,7 @@ namespace CarRentalApi
 
 
 
-            //builder.Services.AddScoped<IOrder, OrderRepository>();
+            builder.Services.AddScoped<IOrder, OrderRepository>();
             builder.Services.AddScoped<ICar, CarRepository>();
 
             var app = builder.Build();

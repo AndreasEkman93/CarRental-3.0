@@ -1,5 +1,6 @@
 ﻿using CarRental.Data;
 using CarRental.Models;
+using CarRentalClient.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -8,132 +9,78 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace CarRental.Controllers
 {
-    [Authorize]
     public class OrderController : Controller
     {
-        private readonly IOrder orderRepository;
-        private readonly ICar carRepository;
-        private readonly UserManager<ApplicationUser> userManager; //Used to get current logged in user.
+        private readonly IOrderService _orderService;
+        private readonly ICarService carService;
 
-        public OrderController(IOrder orderRepository, ICar carRepository,UserManager<ApplicationUser> userManager)
+        public OrderController(IOrderService orderService, ICarService carService)
         {
-            this.orderRepository = orderRepository;
-            this.carRepository = carRepository;
-            this.userManager = userManager;
-        }
-        // GET: OrderController
-        
-        public ActionResult Index()
-        {
-            var userId = userManager.GetUserId(User);
-            if (User.IsInRole("Admin")){ //Depending on role it will generate different lists.
-                return View(orderRepository.GetAll());
-            }
-            else
-                return View(orderRepository.GetAllSpecificCustomer(userId));
+            _orderService = orderService;
+            this.carService = carService;
         }
 
-        // GET: OrderController/Details/5
-        public ActionResult Details(int id)
+        public async Task<ActionResult> Index()
         {
-            return View(orderRepository.GetById(id));
+            var orders = await _orderService.GetOrdersAsync();
+            return View(orders);
         }
 
-        // GET: OrderController/Create
-        [Authorize(Roles ="Customer")]
-        public ActionResult Create(int id)
+        public async Task<ActionResult> Create(int id)
         {
-            var orderCreateVM = new OrderCreateViewModel()  
+            var model = new OrderCreateViewModel
             {
                 CarId = id,
                 StartDate = DateOnly.FromDateTime(DateTime.Today),
                 EndDate = DateOnly.FromDateTime(DateTime.Today)
             };
-            Car car = carRepository.GetById(id);
+            var car = await carService.GetCarByIdAsync(id);
             ViewBag.CarModel = car.Model;
 
             // Get all booked dates for this car to help the customer not to pick reserved dates
-            var bookedDates = orderRepository.GetBookedDatesForCar(id);
+            var bookedDates = await _orderService.GetBookedDatesForCarAsync(id);
             ViewBag.BookedDates = bookedDates.Select(d => d.ToString("yyyy-MM-dd")).ToList();
 
-            return View(orderCreateVM);
+            return View(model);
         }
 
-        // POST: OrderController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Customer")]
-        public ActionResult Create(OrderCreateViewModel model)
+        public async Task<IActionResult> Create(OrderCreateViewModel model)
         {
             try
             {
                 if (model.EndDate < model.StartDate)
                 {
                     ModelState.AddModelError("EndDate", "End date must be after or equal to Start Date.");
-                    ViewBag.CarModel = carRepository.GetById(model.CarId).Model;
+                    ViewBag.CarModel = carService.GetCarByIdAsync(model.CarId).Result.Model;
                     return View();
                 }
-                
-                var existingOrders = orderRepository.GetAll()
+                var orders = await _orderService.GetOrdersAsync();
+                var existingOrders = orders
                     .Where(o => o.CarId == model.CarId)
                     .ToList();
 
                 foreach (var existingOrder in existingOrders)
                 {
-                    if(model.StartDate <= existingOrder.EndDate && model.EndDate >= existingOrder.StartDate)
+                    if (model.StartDate <= existingOrder.EndDate && model.EndDate >= existingOrder.StartDate)
                     {
                         ModelState.AddModelError("", "Selected dates overlap with an existing booking.");
-                        ViewBag.CarModel = carRepository.GetById(model.CarId).Model;
-                        var bookedDates = orderRepository.GetBookedDatesForCar(model.CarId);
+                        ViewBag.CarModel = carService.GetCarByIdAsync(model.CarId).Result.Model;
+                        var bookedDates = await _orderService.GetBookedDatesForCarAsync(model.CarId);
                         ViewBag.BookedDates = bookedDates.Select(d => d.ToString("yyyy-MM-dd")).ToList();
                         return View(model);
                     }
                 }
 
-                if (ModelState.IsValid)
+                var result = await _orderService.CreateOrderAsync(model);
+                if (!result.Success)
                 {
-                    var userId = userManager.GetUserId(User);
-                    var order = new Order
-                    {
-                        CarId = model.CarId,
-                        CustomerId = userId,
-                        StartDate = model.StartDate,
-                        EndDate = model.EndDate
-                    };
-                    
-                    orderRepository.Add(order);
+                    ModelState.AddModelError("", result.ErrorMessage);
+                    return View(model);
                 }
-                return RedirectToAction("OrderConfirmation");
-            }
-            catch
-            {
-                return View();
-            }
-        }
 
-        // GET: OrderController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View(orderRepository.GetById(id));
-        }
-        
-        // POST: OrderController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(Order order)
-        {
-            try
-            {
-                orderRepository.Delete(order);
-                
-                if (User.IsInRole("Admin"))
-                {
-                    return RedirectToAction("Index","Admin");
-                }
-                else
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                return RedirectToAction("OrderConfirmation");
             }
             catch
             {
@@ -146,5 +93,45 @@ namespace CarRental.Controllers
             return View();
         }
 
+        // GET: OrderController/Delete/5
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            var order = await _orderService.GetOrderByIdAsync(id);
+            return View(order);
+        }
+
+        // POST: OrderController/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(Order order)
+        {
+            if (order == null)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                await _orderService.DeleteOrderAsync(order.Id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                // Här kan du logga felet (t.ex. till konsol, fil, etc.)
+                Console.WriteLine($"Error deleting from API: {ex.Message}");
+                ModelState.AddModelError("", "Ett oväntat fel uppstod vid kommunikation med API:t.");
+            }
+            return View(order);
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var order = await _orderService.GetOrderByIdAsync(id);
+            var car = await carService.GetCarByIdAsync(order.CarId);
+
+            ViewBag.CarModel = car.Model;
+            ViewBag.CarRegNr = car.RegNr;
+            return View(order);
+        }
     }
 }
