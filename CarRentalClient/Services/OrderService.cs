@@ -17,18 +17,31 @@ namespace CarRentalClient.Services
             this.client = client;
         }
 
-        public async Task<Response<List<Order>>> GetOrdersAsync()
+        //public async Task<Response<List<Order>>> GetOrdersAsync()
+        //{
+        //    var token = _httpContextAccessor.HttpContext.Session.GetString("AccessToken");
+        //    //_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        //    client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        //    Response<List<Order>> response;
+        //    //var response = await _httpClient.GetAsync("api/order");
+        //    var data = await client.OrderAllAsync();
+
+        //    response = new Response<List<Order>>
+        //    {
+        //        Data = data.ToList(),
+        //        Success = true
+        //    };
+        //    return response;
+        //}
+        public async Task<Response<List<OrderDto>>> GetOrdersAsync()
         {
             var token = _httpContextAccessor.HttpContext.Session.GetString("AccessToken");
-            //_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
             client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-            Response<List<Order>> response;
-            //var response = await _httpClient.GetAsync("api/order");
+            Response<List<OrderDto>> response;
             var data = await client.OrderAllAsync();
-
-            response = new Response<List<Order>>
+            response = new Response<List<OrderDto>>
             {
                 Data = data.ToList(),
                 Success = true
@@ -39,13 +52,23 @@ namespace CarRentalClient.Services
         public async Task CreateOrderAsync(OrderCreateViewModel model)
         {
             var token = _httpContextAccessor.HttpContext.Session.GetString("AccessToken");
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await _httpClient.PostAsJsonAsync("api/order", model);
-            if (!response.IsSuccessStatusCode)
+            //var response = await _httpClient.PostAsJsonAsync("api/order", model);
+            //if (!response.IsSuccessStatusCode)
+            //{
+            //    throw new Exception("Failed to create order.");
+            //}
+            try
             {
-                throw new Exception("Failed to create order.");
+                await client.OrderPOSTAsync(model);
             }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to create order.", ex);
+            }
+            
+
         }
 
         public async Task DeleteOrderAsync(int id)
@@ -58,7 +81,7 @@ namespace CarRentalClient.Services
         public async Task<IEnumerable<DateOnly>> GetBookedDatesForCarAsync(int carId)
         {
             var token = _httpContextAccessor.HttpContext.Session.GetString("AccessToken");
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.GetAsync($"api/order/booked-dates/{carId}");
             if (!response.IsSuccessStatusCode)
             {
@@ -72,21 +95,31 @@ namespace CarRentalClient.Services
             return bookedDates ?? new List<DateOnly>();
         }
         
-        public async Task<Order> GetOrderByIdAsync(int id)
+        public async Task<Response<OrderDto>> GetOrderByIdAsync(int id)
         {
             var token = _httpContextAccessor.HttpContext.Session.GetString("AccessToken");
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _httpClient.GetAsync($"api/order/{id}");
-            if (!response.IsSuccessStatusCode)
+            client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            Response<OrderDto> response;
+            var data = await client.OrderGETAsync(id);
+            response = new Response<OrderDto>
             {
-                throw new Exception("Failed to retrieve order.");
-            }
-            var json = await response.Content.ReadAsStringAsync();
-            var order = System.Text.Json.JsonSerializer.Deserialize<Order>(json, new System.Text.Json.JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-            return order!;
+                Data = data,
+                Success = true
+            };
+            return response;
+
+            //var response = await _httpClient.GetAsync($"api/order/{id}");
+            //if (!response.IsSuccessStatusCode)
+            //{
+            //    throw new Exception("Failed to retrieve order.");
+            //}
+            //var json = await response.Content.ReadAsStringAsync();
+            //var order = System.Text.Json.JsonSerializer.Deserialize<OrderDto>(json, new System.Text.Json.JsonSerializerOptions
+            //{
+            //    PropertyNameCaseInsensitive = true
+            //});
+            //return order!;
         }
     }
 }

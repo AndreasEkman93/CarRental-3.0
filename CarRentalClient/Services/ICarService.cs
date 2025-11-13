@@ -1,4 +1,4 @@
-﻿using CarRental.Models;
+﻿using CarRentalClient.Services.Base;
 
 namespace CarRentalClient.Services
 {
@@ -6,8 +6,8 @@ namespace CarRentalClient.Services
     {
         Task CreateCarAsync(Car car);
         Task DeleteCarAsync(int id);
-        Task<IEnumerable<Car>> GetAllCarsAsync();
-        Task<Car> GetCarByIdAsync(int id);
+        Task<Response<List<Car>>> GetAllCarsAsync();
+        Task<Response<Car>> GetCarByIdAsync(int id);
         Task UpdateCarAsync(int id, Car car);
     }
 }

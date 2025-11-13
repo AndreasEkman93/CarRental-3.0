@@ -27,7 +27,7 @@ namespace CarRentalApi.Controllers
 
         [HttpGet]
         [Authorize]
-        public ActionResult<IEnumerable<Order>> GetOrders()
+        public ActionResult<IEnumerable<OrderDto>> GetOrders()
         {
             var userId = User.FindFirst("uid")?.Value;
             if (User.IsInRole("Admin"))
@@ -38,24 +38,16 @@ namespace CarRentalApi.Controllers
 
         [HttpGet("{id}")]
         [Authorize]
-        public ActionResult<OrderDto> GetOrderById(int id)
+        public ActionResult<OrderDto> GetOrderDtoById(int id)
         {
-            var order = orderRepository.GetById(id);
+            var order = orderRepository.GetDtoById(id);
                 if(order == null)
             {
                 return NotFound();
             }
 
-                var dto = new OrderDto
-                {
-                    Id = order.Id,
-                    CarId = order.CarId,
-                    CarModel = order.Car.Model,
-                    CustomerId = order.CustomerId,
-                    StartDate = order.StartDate,
-                    EndDate = order.EndDate
-                };
-            return Ok(dto);
+                
+            return Ok(order);
         }
 
         [HttpPost]
@@ -77,7 +69,7 @@ namespace CarRentalApi.Controllers
             };
 
             orderRepository.Add(order);
-            return CreatedAtAction(nameof(GetOrderById), new { id = order.Id }, order);
+            return Ok();
         }
 
         [HttpDelete("{id}")]
