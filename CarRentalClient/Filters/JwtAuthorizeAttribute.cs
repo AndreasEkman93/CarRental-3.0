@@ -36,7 +36,7 @@ namespace CarRentalClient.Filters
                 // Om roller är angivna i attributet, kolla att användaren har minst en av dem
                 if (roles.Length > 0 && !roles.Any(r => tokenRoles.Contains(r)))
                 {
-                    context.Result = new ForbidResult(); // 403
+                    context.Result = new RedirectResult("/Auth/AccessDenied");
                     return;
                 }
             }

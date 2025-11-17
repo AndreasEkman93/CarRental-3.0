@@ -17,9 +17,7 @@ namespace CarRentalClient.Services
         private void AddJwtToRequestHeaders()
         {
             var token = httpContextAccessor.HttpContext?.Session.GetString("AccessToken");
-            Console.WriteLine($"Token in session: {token}");
-
-            client.HttpClient.DefaultRequestHeaders.Authorization = null;
+                        client.HttpClient.DefaultRequestHeaders.Authorization = null;
 
             if (!string.IsNullOrEmpty(token))
             {
@@ -46,18 +44,6 @@ namespace CarRentalClient.Services
         {
 
             AddJwtToRequestHeaders();
-            //var response = await httpClient.GetAsync($"/api/Car/{id}");
-            //if (!response.IsSuccessStatusCode)
-            //{
-            //    throw new Exception($"Failed to retrieve car errorCode:{response.StatusCode}.");
-            //}
-            //var json = await response.Content.ReadAsStringAsync();
-            //var car = System.Text.Json.JsonSerializer.Deserialize<Car>(json, new System.Text.Json.JsonSerializerOptions
-            //{
-            //    PropertyNameCaseInsensitive = true
-            //});
-            //return car;
-
             Response<Car> response;
             var data = await client.CarGETAsync(id);
             response = new Response<Car>
@@ -73,11 +59,6 @@ namespace CarRentalClient.Services
         {
 
             AddJwtToRequestHeaders();
-            //var response = await httpClient.PostAsJsonAsync("/api/Car", car);
-            //if (!response.IsSuccessStatusCode)
-            //{
-            //    throw new Exception("Failed to create car.");
-            //}
             try
             {
                 await client.CarPOSTAsync(car);
@@ -87,6 +68,7 @@ namespace CarRentalClient.Services
                 throw new Exception("Failed to create car.", ex);
             }
         }
+
         public async Task UpdateCarAsync(int id, Car car)
         {
 

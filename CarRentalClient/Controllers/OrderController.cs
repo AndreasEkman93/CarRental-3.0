@@ -1,5 +1,4 @@
-﻿using CarRental.Data;
-using CarRentalClient.Services.Base;
+﻿using CarRentalClient.Services.Base;
 using CarRentalClient.Filters;
 using CarRentalClient.Services;
 using Microsoft.AspNetCore.Authorization;

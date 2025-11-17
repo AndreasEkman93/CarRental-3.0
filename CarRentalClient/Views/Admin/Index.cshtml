@@ -18,16 +18,16 @@
     <tbody>
         @foreach (var order in Model.Orders) @* If the EndDate of the order is before today it will make it grey and remove the Delete action.*@
         {
-            var isExpired = order.EndDate < DateOnly.FromDateTime(DateTime.Today);
+            var isExpired = order.EndDate < DateTime.Today;
             var rowClass = isExpired ? "table-secondary" : "";
             <tr class="@rowClass">
-                <td>@order.Car.Model</td>
-                <td>@order.Customer.UserName</td>
+                <td>@order.CarModel</td>
+                <td>@order.CustomerId</td>
                 <td>@order.StartDate</td>
                 <td>@order.EndDate</td>
                 <td>
                     <a asp-action="Details" asp-controller="Order" asp-route-id="@order.Id">Details</a>
-                    @if (order.EndDate >= DateOnly.FromDateTime(DateTime.Today))
+                    @if (order.EndDate >= DateTime.Today)
                     {
                         <a asp-action="Delete" asp-controller="Order" asp-route-id="@order.Id">Delete</a>
                     }

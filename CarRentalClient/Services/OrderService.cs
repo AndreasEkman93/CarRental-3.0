@@ -6,13 +6,11 @@ namespace CarRentalClient.Services
 {
     public class OrderService : IOrderService
     {
-        private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IClient client;
 
         public OrderService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, IClient client)
         {
-            _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor;
             this.client = client;
         }
@@ -74,25 +72,31 @@ namespace CarRentalClient.Services
         public async Task DeleteOrderAsync(int id)
         {
             var token = _httpContextAccessor.HttpContext.Session.GetString("AccessToken");
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            await _httpClient.DeleteAsync($"api/order/{id}");
+            client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            try
+            {
+                await client.OrderDELETEAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to delete order.", ex);
+            }
         }
 
         public async Task<IEnumerable<DateOnly>> GetBookedDatesForCarAsync(int carId)
         {
             var token = _httpContextAccessor.HttpContext.Session.GetString("AccessToken");
             client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _httpClient.GetAsync($"api/order/booked-dates/{carId}");
-            if (!response.IsSuccessStatusCode)
+            var response = new Response<List<DateTimeOffset>>()
+            {
+                Data = (await client.BookedDatesAsync(carId)).ToList(),
+                Success = true
+            };
+            if (!response.Success)
             {
                 throw new Exception("Failed to retrieve booked dates.");
             }
-            var json = await response.Content.ReadAsStringAsync();
-            var bookedDates = System.Text.Json.JsonSerializer.Deserialize<List<DateOnly>>(json, new System.Text.Json.JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-            return bookedDates ?? new List<DateOnly>();
+            return response.Data;
         }
         
         public async Task<Response<OrderDto>> GetOrderByIdAsync(int id)
