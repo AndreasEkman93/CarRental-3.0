@@ -7,7 +7,7 @@ namespace CarRentalClient.Services
         Task<Response<List<OrderDto>>> GetOrdersAsync();
         Task CreateOrderAsync(OrderCreateViewModel model);
         Task DeleteOrderAsync(int id);
-        Task<IEnumerable<DateOnly>> GetBookedDatesForCarAsync(int carId);
+        Task<IEnumerable<DateTimeOffset>> GetBookedDatesForCarAsync(int carId);
         Task<Response<OrderDto>> GetOrderByIdAsync(int id);
     }
 }

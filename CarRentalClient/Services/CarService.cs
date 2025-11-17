@@ -69,18 +69,22 @@ namespace CarRentalClient.Services
             }
         }
 
-        public async Task UpdateCarAsync(int id, Car car)
+        public async Task<Response<Car>> UpdateCarAsync(int id, Car car)
         {
 
             AddJwtToRequestHeaders();
-            //var response = await httpClient.PutAsJsonAsync($"/api/Car/{id}", car);
-            //if (!response.IsSuccessStatusCode)
-            //{
-            //    throw new Exception("Failed to update car.");
-            //}
+
             try
             {
-                await client.CarPUTAsync(id, car);
+                Response<Car> response;
+                var data = await client.CarPUTAsync(id, car);
+                response = new Response<Car>
+                {
+                    Data = data,
+                    Success = true
+                };
+                return response;
+                
             }
             catch (Exception ex)
             {
@@ -93,11 +97,7 @@ namespace CarRentalClient.Services
         {
 
             AddJwtToRequestHeaders();
-            //var response = await httpClient.DeleteAsync($"/api/Car/{id}");
-            //if (!response.IsSuccessStatusCode)
-            //{
-            //    throw new Exception("Failed to delete car.");
-            //}
+
             try
             {
                 await client.CarDELETEAsync(id);

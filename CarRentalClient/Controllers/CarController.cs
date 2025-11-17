@@ -72,8 +72,8 @@ namespace CarRental.Controllers
         [JwtAuthorize("Admin")]
         public async Task<IActionResult> Edit(int id)
         {
-            var car = await carService.GetCarByIdAsync(id);
-            return View(car);
+            var result = await carService.GetCarByIdAsync(id);
+            return View(result.Data);
         }
 
         // POST: CarController/Edit/5
@@ -106,9 +106,12 @@ namespace CarRental.Controllers
         [JwtAuthorize("Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            var car = await carService.GetCarByIdAsync(id);
-            return View(car);
+            var result = await carService.GetCarByIdAsync(id);
+            return View(result.Data);
+
         }
+
+
 
         // POST: CarController/Delete/5
         [HttpPost]

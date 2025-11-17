@@ -44,7 +44,7 @@ namespace CarRentalApi.Controllers
             var result = await userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
-                return NoContent();
+                return Ok(result);
             }
             else
             {
@@ -90,7 +90,7 @@ namespace CarRentalApi.Controllers
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(user, "Customer");
-                return CreatedAtAction(nameof(GetCustomer), new { id = user.Id }, user);
+                return Ok(result);
             }
             else
             {

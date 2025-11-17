@@ -49,7 +49,8 @@ namespace CarRentalApi.Controllers
             }
 
             carRepository.Add(car);
-            return CreatedAtAction(nameof(GetCar), new { id = car.Id }, car);
+            //return CreatedAtAction(nameof(GetCar), new { id = car.Id }, car);
+            return Ok(car);
         }
 
         // PUT api/<CarController>/5
@@ -70,7 +71,7 @@ namespace CarRentalApi.Controllers
                 return NotFound();
             }
             
-            return NoContent();
+            return Ok(car);
         }
 
         // DELETE api/<CarController>/5
@@ -91,7 +92,7 @@ namespace CarRentalApi.Controllers
             {
                 return BadRequest();
             }
-            return NoContent();
+            return Ok();
         }
     }
 }

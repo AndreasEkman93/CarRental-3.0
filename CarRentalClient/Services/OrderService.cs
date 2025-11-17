@@ -83,7 +83,7 @@ namespace CarRentalClient.Services
             }
         }
 
-        public async Task<IEnumerable<DateOnly>> GetBookedDatesForCarAsync(int carId)
+        public async Task<IEnumerable<DateTimeOffset>> GetBookedDatesForCarAsync(int carId)
         {
             var token = _httpContextAccessor.HttpContext.Session.GetString("AccessToken");
             client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -112,18 +112,6 @@ namespace CarRentalClient.Services
                 Success = true
             };
             return response;
-
-            //var response = await _httpClient.GetAsync($"api/order/{id}");
-            //if (!response.IsSuccessStatusCode)
-            //{
-            //    throw new Exception("Failed to retrieve order.");
-            //}
-            //var json = await response.Content.ReadAsStringAsync();
-            //var order = System.Text.Json.JsonSerializer.Deserialize<OrderDto>(json, new System.Text.Json.JsonSerializerOptions
-            //{
-            //    PropertyNameCaseInsensitive = true
-            //});
-            //return order!;
         }
     }
 }
