@@ -8,6 +8,6 @@ namespace CarRentalClient.Services
         Task DeleteCarAsync(int id);
         Task<Response<List<Car>>> GetAllCarsAsync();
         Task<Response<Car>> GetCarByIdAsync(int id);
-        Task UpdateCarAsync(int id, Car car);
+        Task<Response<Car>> UpdateCarAsync(int id, Car car);
     }
 }

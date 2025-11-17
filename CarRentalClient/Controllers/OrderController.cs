@@ -1,5 +1,4 @@
-﻿using CarRental.Data;
-using CarRentalClient.Services.Base;
+﻿using CarRentalClient.Services.Base;
 using CarRentalClient.Filters;
 using CarRentalClient.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -37,6 +36,8 @@ namespace CarRental.Controllers
             return View(response.Data);
         }
 
+        [HttpGet]
+        [JwtAuthorize("Customer")]
         public async Task<ActionResult> Create(int id)
         {
             var model = new OrderCreateViewModel
@@ -119,7 +120,30 @@ namespace CarRental.Controllers
             try
             {
                 await _orderService.DeleteOrderAsync(orderDto.Id);
-                return RedirectToAction(nameof(Index));
+
+                var token = HttpContext.Session.GetString("AccessToken");
+                if (string.IsNullOrEmpty(token))
+                    return RedirectToAction("Login", "Account");
+
+                // Dekoda JWT
+                var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+
+                // Hämta role-claim (beroende på hur du lagt den i JWT)
+                var role = jwtToken.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+
+                if (role == "Admin")
+                {
+                    return RedirectToAction(nameof(AdminController.Index), "Admin");
+                }
+                else if (role == "Customer")
+                {
+                    return RedirectToAction(nameof(OrderController.Index), "Order");
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
             }
             catch (Exception ex)
             {

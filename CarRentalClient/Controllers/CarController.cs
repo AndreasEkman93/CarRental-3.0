@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using CarRental.Data;
+using CarRentalClient.Filters;
 using CarRentalClient.Services;
 using CarRentalClient.Services.Base;
 using Microsoft.AspNetCore.Authorization;
@@ -27,7 +27,7 @@ namespace CarRental.Controllers
         }
 
         // GET: CarController/Details/5
-        //[Authorize(Roles = "Admin,Customer")]
+        [JwtAuthorize("Admin","Customer")]
         public async Task<ActionResult> Details(int id)
         {
             var car = await carService.GetCarByIdAsync(id);
@@ -35,7 +35,7 @@ namespace CarRental.Controllers
         }
 
         // GET: CarController/Create
-        //[Authorize(Roles = "Admin")]
+        [JwtAuthorize("Admin")]
         public ActionResult Create()
         {
             return View();
@@ -45,7 +45,7 @@ namespace CarRental.Controllers
         // POST: CarController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //[Authorize(Roles = "Admin")]
+        [JwtAuthorize("Admin")]
         public async Task<IActionResult> Create(Car car)
         {
             if (!ModelState.IsValid)
@@ -69,17 +69,17 @@ namespace CarRental.Controllers
         }
 
         // GET: CarController/Edit/5
-        //[Authorize(Roles = "Admin")]
+        [JwtAuthorize("Admin")]
         public async Task<IActionResult> Edit(int id)
         {
-            var car = await carService.GetCarByIdAsync(id);
-            return View(car);
+            var result = await carService.GetCarByIdAsync(id);
+            return View(result.Data);
         }
 
         // POST: CarController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //[Authorize(Roles = "Admin")]
+        [JwtAuthorize("Admin")]
         public async Task<ActionResult> Edit(Car car)
         {
             if (!ModelState.IsValid)
@@ -103,17 +103,20 @@ namespace CarRental.Controllers
         }
 
         // GET: CarController/Delete/5
-        //[Authorize(Roles = "Admin")]
+        [JwtAuthorize("Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            var car = await carService.GetCarByIdAsync(id);
-            return View(car);
+            var result = await carService.GetCarByIdAsync(id);
+            return View(result.Data);
+
         }
+
+
 
         // POST: CarController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //[Authorize(Roles = "Admin")]
+        [JwtAuthorize("Admin")]
         public async Task<IActionResult> Delete(Car car)
         {
             if(car == null)

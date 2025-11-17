@@ -51,7 +51,6 @@ namespace CarRentalApi.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Customer")]
         public IActionResult PostOrder(OrderCreateViewModel model)
         {
             if(model == null)
@@ -81,7 +80,7 @@ namespace CarRentalApi.Controllers
                 return NotFound();
 
             orderRepository.Delete(order);
-            return NoContent();
+            return Ok();
         }
 
         [HttpGet("booked-dates/{carId}")]
