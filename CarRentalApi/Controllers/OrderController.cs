@@ -40,14 +40,23 @@ namespace CarRentalApi.Controllers
         [Authorize]
         public ActionResult<OrderDto> GetOrderDtoById(int id)
         {
-            var order = orderRepository.GetDtoById(id);
-                if(order == null)
+            var order = orderRepository.GetById(id);
+            var orderDto = new OrderDto()
+            {
+                Id = order.Id,
+                CarId = order.CarId,
+                CarModel = order.Car.Model,
+                CustomerId = order.CustomerId,
+                StartDate = order.StartDate,
+                EndDate = order.EndDate
+            };
+            if (order == null)
             {
                 return NotFound();
             }
 
                 
-            return Ok(order);
+            return Ok(orderDto);
         }
 
         [HttpPost]

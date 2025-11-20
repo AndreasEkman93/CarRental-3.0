@@ -34,7 +34,6 @@ namespace CarRentalClient.Controllers
             }
             catch (ApiException ex)
             {
-                // Om du använder NSwag/Refit: fånga API-fel här
                 ModelState.AddModelError("", "Registration failed. Please try again.");
                 return View(userDto);
             }

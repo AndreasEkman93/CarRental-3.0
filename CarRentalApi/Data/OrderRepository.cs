@@ -27,7 +27,6 @@ namespace CarRental.Data
 
         public IEnumerable<OrderDto> GetAll()
         {
-            //return context.Orders.Include(c => c.Customer).Include(o => o.Car).OrderBy(o => o.CustomerId).ThenByDescending(o=> o.EndDate).ToList();
             return context.Orders.Include(c => c.Customer).Include(o => o.Car).OrderBy(o => o.CustomerId).ThenByDescending(o => o.EndDate)
                 .Select(o => new OrderDto
                 {
@@ -43,7 +42,6 @@ namespace CarRental.Data
         public IEnumerable<OrderDto> GetAllSpecificCustomer(string id)
         {
 
-            //return context.Orders.Include(c => c.Customer).Include(o => o.Car).Where(o => o.CustomerId == id).OrderByDescending(o => o.StartDate).ToList();
             return context.Orders
                 .Include(o => o.Car)
                 .Include(o => o.Customer)
@@ -71,12 +69,6 @@ namespace CarRental.Data
         }
         public OrderDto GetDtoById(int id)
         {
-            //var order = context.Orders.Include(a => a.Customer).Include(b => b.Car).FirstOrDefault(s => s.Id==id);
-            //if (order != null)
-            //{
-            //    return order;
-            //}
-            //return null;
             var order = context.Orders
                 .Include(a => a.Customer)
                 .Include(b => b.Car)

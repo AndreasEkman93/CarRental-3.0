@@ -15,24 +15,6 @@ namespace CarRentalClient.Services
             this.client = client;
         }
 
-        //public async Task<Response<List<Order>>> GetOrdersAsync()
-        //{
-        //    var token = _httpContextAccessor.HttpContext.Session.GetString("AccessToken");
-        //    //_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        //    client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        //    Response<List<Order>> response;
-        //    //var response = await _httpClient.GetAsync("api/order");
-        //    var data = await client.OrderAllAsync();
-
-        //    response = new Response<List<Order>>
-        //    {
-        //        Data = data.ToList(),
-        //        Success = true
-        //    };
-        //    return response;
-        //}
         public async Task<Response<List<OrderDto>>> GetOrdersAsync()
         {
             var token = _httpContextAccessor.HttpContext.Session.GetString("AccessToken");
@@ -52,11 +34,6 @@ namespace CarRentalClient.Services
             var token = _httpContextAccessor.HttpContext.Session.GetString("AccessToken");
             client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            //var response = await _httpClient.PostAsJsonAsync("api/order", model);
-            //if (!response.IsSuccessStatusCode)
-            //{
-            //    throw new Exception("Failed to create order.");
-            //}
             try
             {
                 await client.OrderPOSTAsync(model);

@@ -49,7 +49,6 @@ namespace CarRentalApi.Controllers
             }
 
             carRepository.Add(car);
-            //return CreatedAtAction(nameof(GetCar), new { id = car.Id }, car);
             return Ok(car);
         }
 
