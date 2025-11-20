@@ -1,4 +1,4 @@
-﻿@model IEnumerable<CarRental.Models.Car>
+﻿@model IEnumerable<CarRentalClient.Services.Base.Car>
 
 @{
     ViewData["Title"] = "Index";
@@ -7,18 +7,10 @@
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Model)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.RegNr)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PricePerDay)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ImageUrls)
-            </th>
+            <th>@Html.DisplayNameFor(model => model.First().Model)</th>
+            <th>@Html.DisplayNameFor(model => model.First().RegNr)</th>
+            <th>@Html.DisplayNameFor(model => model.First().PricePerDay)</th>
+            <th>Images</th>
             <th></th>
         </tr>
     </thead>
