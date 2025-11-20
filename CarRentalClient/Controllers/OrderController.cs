@@ -27,12 +27,9 @@ namespace CarRental.Controllers
 
             if (!response.Success)
             {
-                // Här kan du logga felet eller visa ett meddelande i ViewBag
                 ViewBag.ErrorMessage = response.Message ?? "Kunde inte hämta ordrar.";
-                return View(new List<OrderDto>()); // Returnerar tom lista till vyn
+                return View(new List<OrderDto>()); 
             }
-
-            // Returnera själva listan (Data) till vyn
             return View(response.Data);
         }
 
@@ -125,11 +122,10 @@ namespace CarRental.Controllers
                 if (string.IsNullOrEmpty(token))
                     return RedirectToAction("Login", "Account");
 
-                // Dekoda JWT
                 var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
                 var jwtToken = handler.ReadJwtToken(token);
 
-                // Hämta role-claim (beroende på hur du lagt den i JWT)
+                //Get role from token
                 var role = jwtToken.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
 
                 if (role == "Admin")
@@ -147,7 +143,7 @@ namespace CarRental.Controllers
             }
             catch (Exception ex)
             {
-                // Här kan du logga felet (t.ex. till konsol, fil, etc.)
+
                 Console.WriteLine($"Error deleting from API: {ex.Message}");
                 ModelState.AddModelError("", "Ett oväntat fel uppstod vid kommunikation med API:t.");
             }

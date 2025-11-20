@@ -60,7 +60,6 @@ namespace CarRental.Controllers
             }
             catch (Exception ex)
             {
-                // Här kan du logga felet (t.ex. till konsol, fil, etc.)
                 Console.WriteLine($"Error posting to API: {ex.Message}");
                 ModelState.AddModelError("", "Ett oväntat fel uppstod vid kommunikation med API:t.");
             }
@@ -94,7 +93,6 @@ namespace CarRental.Controllers
             }
             catch (Exception ex)
             {
-                // Här kan du logga felet (t.ex. till konsol, fil, etc.)
                 Console.WriteLine($"Error posting to API: {ex.Message}");
                 ModelState.AddModelError("", "Ett oväntat fel uppstod vid kommunikation med API:t.");
             }
@@ -131,7 +129,6 @@ namespace CarRental.Controllers
             }
             catch (Exception ex)
             {
-                // Här kan du logga felet (t.ex. till konsol, fil, etc.)
                 Console.WriteLine($"Error deleting from API: {ex.Message}");
                 ModelState.AddModelError("", "Ett oväntat fel uppstod vid kommunikation med API:t.");
             }
